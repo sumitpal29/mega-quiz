@@ -2,8 +2,8 @@ const ERROR = 'ERROR';
 const FAILED = 'FAILED';
 const SUCCESS = 'SUCCESS';
 
-export default {
+module.exports = {
   ERROR,
   FAILED,
   SUCCESS,
-}
+};
