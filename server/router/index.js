@@ -1,10 +1,13 @@
-const express = require('express')
 const bcrypt = require('bcryptjs');
+const express = require('express')
+
+const _get = require('lodash/get');
+const _keys = require('lodash/keys');
 const _isEmpty = require('lodash/isEmpty');
 
+const auth = require('../middleware/auth');
 const Admin = require('../models/admin');
 const STATUS = require('../constants/constant.status');
-const auth = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -105,6 +108,32 @@ router.post("/api/admin/verify", auth, async (req, res) => {
     }
   });
 });
+
+router.post("/api/admin/update-game", auth, async (req, res) => {
+  const allowedProps = ["games"]
+  const props = _keys(_get(req.body, 'updates', {}));
+  console.log('props', props);
+  
+  const isValidUpdate = props.every((prop) => allowedProps.includes(prop));
+
+  if (!isValidUpdate) return res.status(400).send({
+    status: STATUS.ERROR,
+    message: "You are not allowed to update above properties",
+  });
+
+  try {
+    const { admin } = req;
+
+    props.forEach((prop) => {
+      admin[prop] = req.body[prop];
+      console.log(admin)
+    });
+
+    await admin.save().then((_data) => res.status(200).send(_data));
+  } catch (e) {
+    res.status(404).send(e);
+  }
+})
 
 router.get('/', (req, res) => {
   res.send('server is running');

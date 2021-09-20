@@ -3,6 +3,59 @@ const _toLower = require("lodash/toLower");
 const _includes = require("lodash/includes");
 const JWT = require('jsonwebtoken');
 
+const OptionsSchema = new mongoose.Schema({
+  label: { type: String },
+  value: { type: String },
+}, {
+  timestamps: true,
+});
+
+const QuestionsSchema = new mongoose.Schema({
+  answer: { type: String, required: true },
+  audioLink: { type: String },
+  videoLink: { type: String },
+  imageLink: { type: String },
+  options: [OptionsSchema],
+  question: { type: String, required: true },
+}, {
+  timestamps: true,
+});
+
+const GameRounds = new mongoose.Schema({
+  answeredBy: { type: String },
+  score: { type: Number },
+  bonus: { type: Number },
+  negetive: { type: Number },
+  onAnswerSubmit: { type: String },
+  onTimeOut: { type: String },
+  questionAsked: { type: String },
+  questionOccurance: { type: String },
+  roundDirection: { type: Boolean },
+  timeLimit: { type: Number },
+  eliminationControl: { type: Boolean },
+  eliminationCount: { type: Number },
+  roundtype: { type: String },
+  questions: [QuestionsSchema]
+}, {
+  timestamps: true,
+});
+
+const GameParticipents = new mongoose.Schema({
+  teamName: { type: String, required: true },
+  password: { type: String, required: true }
+}, {
+  timestamps: true,
+});
+
+const GameSchema = new mongoose.Schema({
+  gameId: { type: String, unique: true, required: true },
+  gameName: { type: String, required: true, trim: true, minlength: 4, },
+  gameRounds: [GameRounds],
+  gameParticipents: [GameParticipents]
+}, {
+  timestamps: true,
+});
+
 const AdminSchema = new mongoose.Schema(
   {
     username: { type: String, unique: true, required: true, trim: true, minlength: 4,},
@@ -25,6 +78,7 @@ const AdminSchema = new mongoose.Schema(
         },
       },
     ],
+    games: [GameSchema]
   },
   {
     collection: "admins",
