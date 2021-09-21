@@ -24,10 +24,9 @@ router.post('/api/admin-signup', async (req, res) => {
       message: 'User created successfully. Please login to access Admin dashboard'
     }});
   } catch (error) {
-    console.error(error);
     res.status(400).send({
       status: STATUS.ERROR,
-      error
+      error: error.message
     })
   }
 });
@@ -52,11 +51,12 @@ router.post('/api/admin-login', async (req, res) => {
         data: {
           token,
           username: user.username,
+          _id: _get(user, '_id'),
+          games: _get(user, 'games', []),
         }
       });
     }
   } catch (error) {
-    console.error(error);
     res.status(400).send({
       status: STATUS.ERROR,
       error
@@ -67,11 +67,11 @@ router.post('/api/admin-login', async (req, res) => {
 // logout
 router.post("/api/admin/logout", auth, async (req, res) => {
   try {
-    req.user.tokens = req.user.tokens.filter((ob) => {
+    req.admin.tokens = req.admin.tokens.filter((ob) => {
       // filter out which is matched
       return ob.token !== req.token;
     });
-    await req.user.save();
+    await req.admin.save();
     res.send({
       status: STATUS.SUCCESS,
       message: "Logged-out successfully",
@@ -84,8 +84,8 @@ router.post("/api/admin/logout", auth, async (req, res) => {
 // logout-all
 router.post("/api/admin/logout-all", auth, async (req, res) => {
   try {
-    req.user && (req.user.tokens = []);
-    await req.user.save();
+    req.admin && (req.admin.tokens = []);
+    await req.admin.save();
     res.send({
       status: STATUS.SUCCESS,
       message: "Logged-out from all sessions",
@@ -98,13 +98,14 @@ router.post("/api/admin/logout-all", auth, async (req, res) => {
 router.post("/api/admin/verify", auth, async (req, res) => {
   const { admin } = req;
   const { token } = req.body;
-  const { username, _id } = admin;
+  const { username, _id, games = [] } = admin;
   res.send({
     status: STATUS.SUCCESS,
     data: {
       username,
       _id,
-      token
+      token,
+      games
     }
   });
 });
@@ -112,7 +113,6 @@ router.post("/api/admin/verify", auth, async (req, res) => {
 router.post("/api/admin/update-game", auth, async (req, res) => {
   const allowedProps = ["games"]
   const props = _keys(_get(req.body, 'updates', {}));
-  console.log('props', props);
   
   const isValidUpdate = props.every((prop) => allowedProps.includes(prop));
 
@@ -125,13 +125,15 @@ router.post("/api/admin/update-game", auth, async (req, res) => {
     const { admin } = req;
 
     props.forEach((prop) => {
-      admin[prop] = req.body[prop];
-      console.log(admin)
+      admin[prop] = req.body.updates[prop];
     });
 
     await admin.save().then((_data) => res.status(200).send(_data));
   } catch (e) {
-    res.status(404).send(e);
+    res.status(404).send({
+      status: STATUS.ERROR,
+      message: e.message,
+    });
   }
 })
 
