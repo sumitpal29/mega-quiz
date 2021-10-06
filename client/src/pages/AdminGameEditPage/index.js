@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, message } from "antd";
 import { useParams } from "react-router-dom";
+import io from 'socket.io-client'
 
 import _get from "lodash/get";
 import _map from "lodash/map";
@@ -9,12 +10,15 @@ import _isEmpty from "lodash/isEmpty";
 
 import { useAdminContext } from "../../contexts/AdminContext";
 import { useGameContext } from "../../contexts/GameContext";
+import SOCKET from '../../contexts/SocketContext';
 
 import Layout from "../../components/Layout";
 import Rounds from "../../components/Rounds";
 // Modals
 import AddRoundModal from "../../components/modals/AddRounds";
 import AddParticipentsModal from "../../components/modals/AddParticipents";
+import StartGame from '../../components/modals/StartGame';
+
 
 import styles from "./adminGameEditPage.module.scss";
 
@@ -26,9 +30,15 @@ function AdminGameEditPage({ history }) {
   const [participentModalVisibility, setparticipentModalVisibility] = useState(false);
   const [isSaveButtonLoading, setIsSaveButtonLoading] = useState(false);
   const [adminLogoutBtnLoading, setAdminLogoutBtnLoading] = useState(false);
+  const [startGameModalVisible, setstartGameModalVisible] = useState(false);
 
   const { isAdminLoggedIn, isAuthenticated, admin, saveGame, adminLogout, isAuthenticating } = useAdminContext();
   const { addRound, getGame, getRounds, setCurrentGame, addParticipent, getParticipents, getAllGames, onAdminOnBoard } = useGameContext();
+
+  useEffect(() => {
+    const socket = io('http://localhost:5000', { transports : ['websocket'] });
+    SOCKET.setSocket(socket);
+  }, []);
 
   useEffect(() => {
     console.log('here')
@@ -98,6 +108,23 @@ function AdminGameEditPage({ history }) {
     }
   }
 
+  const handlePlayButtonClick = () => {
+    setstartGameModalVisible(true);
+  }
+
+  const onGamePlayStart = ({ gameKey }) => {
+    const socket = SOCKET.getSocket();
+    socket.emit('createGame', {
+      gameKey,
+      gameId: id,
+      adminId: admin._id
+    }, (game) => {
+      console.log('New Game created', game)
+    });
+    // emit event
+    history.push(`/admin/game-play/${gameKey}`);
+  }
+
   return (
     <Layout logout={handleLogout} logoutBtnLoading={adminLogoutBtnLoading}>
       <>
@@ -109,7 +136,7 @@ function AdminGameEditPage({ history }) {
                 <Button onClick={handleOnAddRound} type="primary">Add Round</Button>
                 <Button onClick={showParticipentsModal} type="secondary">Add Participends</Button>
                 <Button loading={isSaveButtonLoading} style={{ background: "#ed901e", color: "#fff" }} onClick={handleSaveGame} type="secondary">Save</Button>
-                <Button style={{ background: "#0ab261", color: "#fff" }}>Play</Button>
+                <Button onClick={handlePlayButtonClick} style={{ background: "#0ab261", color: "#fff" }}>Play</Button>
               </div>
             </section>
             
@@ -147,6 +174,12 @@ function AdminGameEditPage({ history }) {
           modalVisibility={participentModalVisibility}
           onSubmit={handleParticipentModalSubmit}
           hideModal={handleHideParticipentModal}
+        />
+
+        <StartGame
+          isModalVisible={startGameModalVisible}
+          handleCancel={() => setstartGameModalVisible(false)}
+          onSubmit={onGamePlayStart}
         />
       </>
     </Layout>

@@ -8,7 +8,9 @@ import Admin from './pages/Admin';
 import AdminDashboard from './pages/AdminDashboard';
 import Game from './pages/Game';
 import Participents from './pages/Participents';
+import ParticipentsGamePlay from './pages/ParticipentsGamePlay';
 import AdminGameEditPage from './pages/AdminGameEditPage';
+import AdminGamePlayController from './pages/AdminGamePlay';
 
 const App = () => (
   <Router>
@@ -16,8 +18,10 @@ const App = () => (
     <Route path="/admin" exact component={Admin} />
     <Route path="/admin-dasboard" exact component={AdminDashboard} />
     <Route path="/admin-game/edit/:id" component={AdminGameEditPage} />
-    <Route path="/game" component={Game} />
-    <Route path="/play" component={Participents} />
+    <Route path="/admin/game-play/:gamekey" component={AdminGamePlayController} />
+    <Route path="/watch-live" exact component={Game} />
+    <Route path="/join" exact component={Participents} />
+    <Route path="/join/game" component={ParticipentsGamePlay} />
   </Router>
 );
 
