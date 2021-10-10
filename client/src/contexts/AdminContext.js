@@ -74,6 +74,7 @@ function AdminProvider(props) {
   const saveGame = async (games, onSuccess, orError) => {
     if(_isEmpty(games)) return false;
     try {
+      console.log('***games', games)
       const res = await axios.post('http://localhost:5000/api/admin/update-game', { updates: { games }, token });
       if (_isFunction(onSuccess)) onSuccess(res);
       return res;

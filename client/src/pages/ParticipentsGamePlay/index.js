@@ -2,56 +2,49 @@ import React, { useState, useEffect } from 'react'
 import queryString from 'query-string'
 import io from 'socket.io-client'
 
-import _map from 'lodash/map';
+import _get from 'lodash/get';
 
+import SOCKET from '../../contexts/SocketContext';
 let socket;
 
-function ParticipentsGamePlay({ location }) {
-  const [messages, setMessages] = useState([])
-  const [message, setMessage] = useState('')
+function ParticipentsGamePlay({ location, history }) {
+  const [participentData, setParticipentData] = useState(null);
+  // depends on the question
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [currentParticipent, setCurrentParticipent] = useState(null);
+
   useEffect(() => {
-    const { room, password } = queryString.parse(location.search);
-    console.log('You are in', room, password);
-
-    socket = io('http://localhost:5000', { transports : ['websocket'] });
-
-    socket.emit('join', { room, password });
-
-    console.log(socket);
+    socket = SOCKET.getSocket();
+    const { gameKey, password } = queryString.parse(location.search);
+    // set participent data on join
+    socket.emit('joingame', { gameKey, password }, ({ error, participent }) => {
+      console.log({ error, participent })
+      if(error) {
+        history.push('/join');
+        return;
+      }
+      setParticipentData(participent);
+    });
 
     return () => {
-      socket.emit('disconnect');
+      socket.disconnect();
       socket.off();
     }
   }, [location.search]);
 
 
   useEffect(() => {
-    socket.on('message', (m) => {
-      console.log('message received', m)
-      setMessages(p => [...p, m]);
-    })
-  }, [])
+    socket.on('question', ({ qestion, participent }) => {
+      console.log('clintSide', qestion, participent)
+      setCurrentQuestion(qestion);
+      setCurrentParticipent(participent)
+    });
+  }, []);
 
-  const sendMessage = (e) => {
-    e.preventDefault();
-    if(message) {
-      socket.emit('sendMessage', message, () => {
-        setMessage('')
-      })
-    }
-  }
   return (
     <div>
-      <h1>All messages</h1>
-      {_map(messages, m => <p>{m.text}</p>)}
-
-      <h2>Type here</h2>
-      <input
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyPress={e => e.key === 'Enter' ? sendMessage(e) : null}
-      />
+      <h1>Question</h1>
+      <showQuestion question={currentQuestion} participent={currentParticipent} player={participentData}/>
     </div>
   )
 }

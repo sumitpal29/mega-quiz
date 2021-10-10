@@ -35,7 +35,8 @@ const GameRounds = new mongoose.Schema({
   eliminationControl: { type: Boolean },
   eliminationCount: { type: Number },
   roundtype: { type: String },
-  questions: [QuestionsSchema]
+  questions: [QuestionsSchema],
+  roundname: { type: String }
 }, {
   timestamps: true,
 });

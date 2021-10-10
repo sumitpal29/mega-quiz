@@ -1,23 +1,16 @@
 import React, { useState } from 'react'
 import { Row, Col, Form, Input, Button } from 'antd';
-import { Link } from 'react-router-dom'
 
-function ParticipentsJoin({ history }) {
+function ViewGame({ history }) {
   const [form] = Form.useForm();
-  const [password, setPassword] = useState('');
   const [gameKey, setgameKey] = useState('');
 
   const handelRoomDataChange = async (e) => {
     setgameKey(e.target.value);
   };
 
-  const handelPasswordChange = async (e) => {
-    setPassword(e.target.value);
-  };
-
-
   const onFinish = () => {
-    history.push(`/join/game?gameKey=${gameKey}&password=${password}`)
+    history.push(`/watch?gameKey=${gameKey}`);
     form.resetFields();
   };
 
@@ -27,11 +20,11 @@ function ParticipentsJoin({ history }) {
 
   return (
     <div>
-      <h1>Are you gonna make it to the top?</h1>
+      <h1>Join Game</h1>
       <div>
         <Form
           form={form}
-          name="add mcq"
+          name="Join Game"
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
@@ -50,19 +43,6 @@ function ParticipentsJoin({ history }) {
                 />
               </Form.Item>
             </Col>
-            <Col span={11}>
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[{ required: true, message: "Please enter game password" }]}
-              >
-                <Input.Password
-                  value={password}
-                  placeholder="Enter Password"
-                  onChange={handelPasswordChange}
-                />
-              </Form.Item>
-            </Col>
             <Col span={2}>
               <Form.Item style={{ textAlign: 'center'}}>
                 <Button type="primary" onClick={onFinish}>
@@ -77,4 +57,4 @@ function ParticipentsJoin({ history }) {
   )
 }
 
-export default ParticipentsJoin
+export default ViewGame;

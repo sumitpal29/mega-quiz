@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, message } from "antd";
 import { useParams } from "react-router-dom";
-import io from 'socket.io-client'
 
 import _get from "lodash/get";
 import _map from "lodash/map";
@@ -36,12 +35,6 @@ function AdminGameEditPage({ history }) {
   const { addRound, getGame, getRounds, setCurrentGame, addParticipent, getParticipents, getAllGames, onAdminOnBoard } = useGameContext();
 
   useEffect(() => {
-    const socket = io('http://localhost:5000', { transports : ['websocket'] });
-    SOCKET.setSocket(socket);
-  }, []);
-
-  useEffect(() => {
-    console.log('here')
     if (!id) {
       history.push("/admin");
     }
@@ -52,7 +45,6 @@ function AdminGameEditPage({ history }) {
     }
     
     if(!_isEmpty(admin) && isAuthenticated) {
-      console.log('Indide dude')
       const currentAdminSavedGames = _get(admin, 'games', []);
 
       if (_isEmpty(currentAdminSavedGames)) history.push("/admin-dasboard");
@@ -72,7 +64,9 @@ function AdminGameEditPage({ history }) {
   const participents = getParticipents();
 
   const handleOnAddRound = () => setisAddRoundModalVisible(true);
-  const handleOnAddRoundSubmit = (data) => {
+  const handleOnAddRoundSubmit = (data, c) => {
+    console.log(data, c)
+    
     addRound(data);
     setisAddRoundModalVisible(false);
   };
@@ -119,10 +113,9 @@ function AdminGameEditPage({ history }) {
       gameId: id,
       adminId: admin._id
     }, (game) => {
-      console.log('New Game created', game)
+      console.log('New Game created', game);
+      history.push(`/admin/game-play/${gameKey}`);
     });
-    // emit event
-    history.push(`/admin/game-play/${gameKey}`);
   }
 
   return (

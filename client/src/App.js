@@ -11,6 +11,7 @@ import Participents from './pages/Participents';
 import ParticipentsGamePlay from './pages/ParticipentsGamePlay';
 import AdminGameEditPage from './pages/AdminGameEditPage';
 import AdminGamePlayController from './pages/AdminGamePlay';
+import ViewGame from './pages/ViewGame';
 
 const App = () => (
   <Router>
@@ -19,9 +20,10 @@ const App = () => (
     <Route path="/admin-dasboard" exact component={AdminDashboard} />
     <Route path="/admin-game/edit/:id" component={AdminGameEditPage} />
     <Route path="/admin/game-play/:gamekey" component={AdminGamePlayController} />
-    <Route path="/watch-live" exact component={Game} />
     <Route path="/join" exact component={Participents} />
     <Route path="/join/game" component={ParticipentsGamePlay} />
+    <Route path="/watch/:gameKey" component={Game} />
+    <Route path="/view" exact component={ViewGame} />
   </Router>
 );
 
